@@ -1,6 +1,6 @@
 #!/bin/bash
 
-CHART_FILE="flow/Chart.yaml"
+CHART_FILE="charmm/Chart.yaml"
 TMP_FILE="/tmp/Chart.yaml.tmp"
 VERSION_REGEX="^version: ([0-9]+\.[0-9]+\.[0-9]+)$"
 

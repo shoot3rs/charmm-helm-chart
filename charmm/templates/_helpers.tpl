@@ -1,7 +1,7 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "flow-helm-chart.name" -}}
+{{- define "charmm-helm-chart.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
@@ -10,7 +10,7 @@ Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
 */}}
-{{- define "flow-helm-chart.fullname" -}}
+{{- define "charmm-helm-chart.fullname" -}}
 {{- if .Values.fullnameOverride }}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
 {{- else }}
@@ -26,16 +26,16 @@ If release name contains chart name it will be used as a full name.
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "flow-helm-chart.chart" -}}
+{{- define "charmm-helm-chart.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Common labels
 */}}
-{{- define "flow-helm-chart.labels" -}}
-helm.sh/chart: {{ include "flow-helm-chart.chart" . }}
-{{ include "flow-helm-chart.selectorLabels" . }}
+{{- define "charmm-helm-chart.labels" -}}
+helm.sh/chart: {{ include "charmm-helm-chart.chart" . }}
+{{ include "charmm-helm-chart.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
@@ -45,17 +45,17 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{/*
 Selector labels
 */}}
-{{- define "flow-helm-chart.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "flow-helm-chart.name" . }}
+{{- define "charmm-helm-chart.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "charmm-helm-chart.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
 Create the name of the service account to use
 */}}
-{{- define "flow-helm-chart.serviceAccountName" -}}
+{{- define "charmm-helm-chart.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create }}
-{{- default (include "flow-helm-chart.fullname" .) .Values.serviceAccount.name }}
+{{- default (include "charmm-helm-chart.fullname" .) .Values.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}

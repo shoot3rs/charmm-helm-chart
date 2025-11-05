@@ -1,12 +1,12 @@
 package:
-	helm package flow
+	helm package charmm
 	helm repo index .
 
 lint:
-	helm lint flow
+	helm lint charmm
 
 template:
-	helm template flow-helm-chart flow --values flow/values.yaml
+	helm template charmm-helm-chart charmm --values charmm/values.yaml
 
 bundle:
 	make lint

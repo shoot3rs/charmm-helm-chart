@@ -1,7 +1,7 @@
 # Default service properties
 serviceProperties:
   name: "default-service"
-  namespace: "flow"
+  namespace: "charmm"
   enabled: false
 
 deployment:
@@ -84,7 +84,7 @@ virtualService:
             prefix: /
       route:
         - destination:
-            host: default-service.flow.svc.cluster.local
+            host: default-service.default.svc.cluster.local
             port:
               number: 8080
 
