@@ -1,0 +1,56 @@
+{{- $name := coalesce .Values.cronJob.name .Values.serviceProperties.name -}}
+{{- $namespace := coalesce .Values.cronJob.namespace .Values.serviceProperties.namespace -}}
+{{- $enabled := .Values.cronJob.enabled -}}
+
+{{ if $enabled }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ $name }}
+  namespace: {{ $namespace }}
+spec:
+  failedJobsHistoryLimit: {{ .Values.cronJob.failedJobsHistoryLimit | default 1 }}
+  successfulJobsHistoryLimit: {{ .Values.cronJob.successfulJobsHistoryLimit | default 3 }}
+  startingDeadlineSeconds: {{ .Values.cronJob.startingDeadlineSeconds }}
+  concurrencyPolicy: {{ .Values.cronJob.concurrencyPolicy | default "Forbid" | title }}
+  schedule: {{ .Values.cronJob.schedule | quote }}
+  suspend: {{  .Values.cronJob.suspend | default false }}
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: {{ .Values.cronJob.ttlSecondsAfterFinished | default 100 }}
+      suspend: {{ .Values.cronJob.suspend | default false }}
+      parallelism: {{ .Values.cronJob.parallelism | default 1 }}
+      completions: {{ .Values.cronJob.completions | default   1 }}
+      activeDeadlineSeconds: {{ .Values.cronJob.activeDeadlineSeconds }}
+      completionMode: {{ .Values.cronJob.completionMode | default "NonIndexed" | title }}
+      backoffLimit: {{ .Values.cronJob.backoffLimit | default 5 }}
+      backoffLimitPerIndex: {{ .Values.cronJob.backoffLimitPerIndex }}
+      template:
+        {{ if and .Values.cronJob.metadata (not (empty .Values.cronJob.metadata)) }}
+        metadata:
+          {{- toYaml .Values.cronJob.metadata | nindent 10 }}
+        {{- end }}
+        spec:
+          {{- if .Values.cronJob.volumes }}
+          volumes:
+            {{- toYaml .Values.cronJob.volumes | nindent 12 }}
+          {{- end }}
+          containers:
+                - name: {{ $name }}
+                  image: "{{ .Values.cronJob.image.repository }}:{{ .Values.cronJob.image.tag | default .Chart.AppVersion }}"
+                  imagePullPolicy: {{ .Values.cronJob.image.pullPolicy | default "Always" }}
+                  envFrom:
+                    - configMapRef:
+                        name: {{ coalesce .Values.configMap.name .Values.serviceProperties.name }}
+                  {{- if .Values.cronJob.args }}
+                  args:
+                    {{- toYaml .Values.cronJob.args | nindent 20 }}
+                  {{- end }}
+                  {{- if .Values.cronJob.command }}
+                  command:
+                    {{- toYaml .Values.cronJob.command | nindent 20 }}
+                  {{- end }}
+                  resources:
+                    {{- toYaml .Values.cronJob.resources | nindent 20 }}
+          restartPolicy: {{ .Values.cronJob.restartPolicy }}
+{{- end }}

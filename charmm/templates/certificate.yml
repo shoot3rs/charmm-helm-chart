@@ -1,0 +1,22 @@
+{{- $name := coalesce .Values.certificate.name .Values.serviceProperties.name -}}
+{{- $namespace := coalesce .Values.certificate.namespace .Values.serviceProperties.namespace -}}
+{{- $enabled := .Values.certificate.enabled -}}
+
+{{- if $enabled -}}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ $name }}
+  namespace: {{ $namespace }}
+spec:
+  secretName: {{ .Values.certificate.secretName }}
+  issuerRef:
+    {{- $issuerRef := default dict .Values.certificate.issuerRef }}
+    name: {{ default "letsencrypt" ($issuerRef.name | toString) }}
+    kind: {{ default "ClusterIssuer" ($issuerRef.kind | toString) }}
+  commonName: {{ .Values.certificate.commonName }}
+  dnsNames:
+    {{- range .Values.certificate.dnsNames }}
+    - {{ . }}
+    {{- end }}
+{{- end -}}

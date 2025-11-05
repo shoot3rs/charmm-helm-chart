@@ -1,0 +1,23 @@
+{{- $name := coalesce .Values.persistentVolume.name .Values.serviceProperties.name -}}
+{{- $namespace := coalesce .Values.persistentVolume.namespace .Values.serviceProperties.namespace -}}
+{{- $enabled := .Values.persistentVolume.enabled -}}
+
+{{ if $enabled }}
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ $name}}
+  namespace: {{ $namespace }}
+  labels:
+    type: {{ .Values.persistentVolume.labelType}}
+spec:
+  storageClassName: {{ .Values.persistentVolume.storage.className}}
+  capacity:
+    storage: {{ .Values.persistentVolume.storage.capacity}}
+  accessModes:
+    {{- range .Values.persistentVolume.accessModes }}
+    - {{ . }}
+    {{- end }}
+  hostPath:
+    path: {{ .Values.persistentVolume.hostPath}}
+{{- end }}

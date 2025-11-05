@@ -1,0 +1,37 @@
+{{- $name := coalesce .Values.gateway.name .Values.serviceProperties.name -}}
+{{- $namespace := coalesce .Values.gateway.namespace .Values.serviceProperties.namespace -}}
+{{- $enabled := .Values.gateway.enabled -}}
+
+{{ if $enabled }}
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: {{ $name }}
+  namespace: {{ $namespace }}
+spec:
+  selector:
+    istio: {{ .Values.gateway.specSelector }}
+  servers:
+    {{ range .Values.gateway.servers }}
+    - port:
+        number: {{ .port.number }}
+        name: {{ .port.name }}
+        protocol: {{ .port.protocol | upper }}
+      hosts:
+        {{ range .hosts }}
+          - {{ . | quote }}
+        {{ end }}
+      {{ if .tls}}
+      tls:
+        {{ if .tls.mode }}
+        mode: {{ .tls.mode | upper }}
+        {{ end }}
+        {{ if .tls.credentialName }}
+        credentialName: {{ .tls.credentialName }}
+        {{ end }}
+        {{ if .tls.httpsRedirect }}
+        httpsRedirect: {{ .tls.httpsRedirect }}
+        {{- end }}
+      {{- end -}}
+    {{- end -}}
+{{ end }}

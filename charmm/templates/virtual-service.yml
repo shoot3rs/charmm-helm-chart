@@ -1,0 +1,94 @@
+{{- $name := coalesce .Values.virtualService.name .Values.serviceProperties.name -}}
+{{- $namespace := coalesce .Values.virtualService.namespace .Values.serviceProperties.namespace -}}
+{{- $enabled := .Values.virtualService.enabled -}}
+
+{{ if $enabled }}
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: {{ $name }}
+  namespace: {{ $namespace }}
+spec:
+  hosts:
+    - {{ .Values.virtualService.host }}
+      {{ if .Values.virtualService.gateways }}
+  gateways:
+    {{- range .Values.virtualService.gateways }}
+    - {{ . }}
+    {{- end }}
+  {{- end }}
+  {{ if and .Values.virtualService.httpRoutes (not (empty .Values.virtualService.httpRoutes)) }}
+  http:
+  {{- range .Values.virtualService.httpRoutes }}
+    - name: {{ .name }}
+      {{ if .corsPolicy }}
+      corsPolicy:
+        {{ if .corsPolicy.allowOrigins }}
+        allowOrigins:
+        {{- range .corsPolicy.allowOrigins }}
+          {{- if .exact }}
+          - exact: {{ .exact | quote }}
+          {{- else if .prefix }}
+          - prefix: {{ .prefix | quote }}
+          {{- else if .regex }}
+          - regex: {{ .regex | quote }}
+          {{- end }}
+        {{- end }}
+        {{- else }}
+        allowOrigins:
+          - regex: ".*"
+        {{- end }}
+        {{ if .corsPolicy.allowMethods }}
+        allowMethods:
+          {{- range .corsPolicy.allowMethods }}
+          - {{ . | upper }}
+          {{- end }}
+        {{ end }}
+        {{ if .corsPolicy.allowHeaders }}
+        allowHeaders:
+          {{- range .corsPolicy.allowHeaders }}
+          - {{ . }}
+          {{- end }}
+        {{ end }}
+      {{ end }}
+      match:
+      {{- range .match }}
+        - uri:
+            prefix: {{ .uri.prefix }}
+      {{- end }}
+      {{- if .rewrite }}
+      rewrite:
+        uri: {{ .rewrite.uri }}
+      {{- end }}
+      route:
+      {{- range .route }}
+        - destination:
+            host: {{ default (printf "%s.%s.svc.cluster.local" (coalesce $.Values.deployment.name $.Values.serviceProperties.name) (coalesce $.Values.deployment.namespace $.Values.serviceProperties.namespace)) .destination.host }}
+            port:
+              number: {{ .destination.port.number }}
+            {{ if .destination.subset }}
+            subset: {{ .destination.subset }}
+            {{- end }}
+      {{- end }}
+  {{- end }}
+  {{- end }}
+
+  {{ if and .Values.virtualService.tcpRoutes (not (empty .Values.virtualService.tcpRoutes ) ) }}
+  tcp:
+  {{- if .Values.virtualService.tcpRoutes }}
+  {{- range .Values.virtualService.tcpRoutes }}
+    - match:
+      {{- range .match }}
+        - port: {{ .port }}
+      {{- end }}
+      route:
+      {{- range .route }}
+        - destination:
+            host: {{ default (printf "%s.%s.svc.cluster.local" (coalesce $.Values.deployment.name $.Values.serviceProperties.name) (coalesce $.Values.deployment.namespace $.Values.serviceProperties.namespace)) .destination.host }}
+            port:
+              number: {{ .destination.port.number }}
+      {{- end }}
+  {{- end }}
+  {{- end }}
+  {{- end }}
+{{- end }}

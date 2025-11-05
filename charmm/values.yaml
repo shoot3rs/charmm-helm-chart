@@ -1,0 +1,208 @@
+# Default service properties
+serviceProperties:
+  name: "default-service"
+  namespace: "flow"
+  enabled: false
+
+deployment:
+  enabled: false
+  replicaCount: 1
+  restartPolicy: Always
+  args: []
+  image:
+    # repository -- The image repository to pull from
+    repository: your-repo.acr.io
+    tag: latest
+    pullPolicy: Always
+  ports: {}
+
+service:
+  enabled: false
+  type: ClusterIP
+  ports: {}
+
+resources:
+  enabled: false
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 10
+
+configMap:
+  enabled: false
+  data: {}
+
+secrets:
+  enabled: false
+  data: {}
+
+certificate:
+  enabled: false
+  secretName: ""
+  issuerRef:
+    name: letsencrypt
+    kind: ClusterIssuer
+  commonName: ""
+  dnsNames: {}
+
+gateway:
+  enabled: false
+  name: ""
+  namespace: ""
+  specSelector: ""
+  servers: {}
+
+virtualService:
+  enabled: false
+  gateways:
+    - api-gateway
+  host: api.your-domain.com
+  httpRoutes:
+    - name: default-service
+      corsPolicy:
+        allowOrigins:
+          - regex: ".*"
+          - exact: "*"
+        allowHeaders:
+          - authorization
+          - content-type
+        allowMethods:
+          - GET
+          - PUT
+          - POST
+          - PATCH
+          - DELETE
+      match:
+        - uri:
+            prefix: /
+      route:
+        - destination:
+            host: default-service.flow.svc.cluster.local
+            port:
+              number: 8080
+
+destinationRule:
+  enabled: false
+  host: ""
+  trafficPolicy:
+    loadBalancer:
+      simple: ""
+    tls:
+      mode: ""
+  subsets:
+    - name: ""
+      labels:
+        version: v3
+      trafficPolicy:
+        loadBalancer:
+          simple: ""
+
+cronJob:
+  enabled: false
+  schedule: "59 23 28-31 * *"
+  restartPolicy: OnFailure
+  containers: []
+  volumes: []
+  metadata: {}
+
+sidecar:
+  enabled: false
+  name: ""
+  namespace: ""
+  egress:
+    - hosts:
+        - "./*"
+        - "default/*"
+        - "charmm/*"
+
+persistentVolume:
+  enabled: false
+  labelType: ""
+  storage:
+    className: "default"
+    capacity: "10Gi"
+  accessModes:
+    - ReadWriteOnce
+  hostPath: "/mnt/data"
+
+persistentVolumeClaim:
+  enabled: false
+  accessModes:
+    - ReadWriteOnce
+  storage: 16Gi
+
+argocd:
+  name: " "
+  enabled: false
+  namespace: " "
+  projectName: ""
+  sources: []
+  sync:
+    automated:
+      prune: "true"
+      selfHeal: "true"
+    options:
+      - RespectIgnoreDifferences=true
+      - PruneLast=true
+      - Validate=false
+      - ServerSideApply=true
+      - ApplyOutOfSyncOnly=true
+      - CreateNamespace=true
+    retry:
+      limit: "2"
+      backoffDuration: "5s"
+      backOffMaxDuration: "3m0s"
+      backOffFactor: "2"
+  destination:
+    name: ""
+    namespace: ""
+    server: "https://kubernetes.default.svc"
+  repository:
+    url: ""
+    path: ""
+    targetRevision: ""
+    chart: ""
+    valueFiles: {}
+  values: {}
+
+hpa:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 80
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+        - type: Percent
+          value: 100
+          periodSeconds: 15
+    scaleUp:
+      stabilizationWindowSeconds: 0
+      policies:
+        - type: Percent
+          value: 100
+          periodSeconds: 15
+        - type: Pods
+          value: 4
+          periodSeconds: 15
+      selectPolicy: Max
