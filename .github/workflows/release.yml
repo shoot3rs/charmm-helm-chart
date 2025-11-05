@@ -28,7 +28,7 @@ jobs:
 
       - name: Commit and push Chart.yaml
         run: |
-          git add flow/Chart.yaml
+          git add charmm/Chart.yaml
           git commit -m "Update chart version [skip ci]"
           git push
 
