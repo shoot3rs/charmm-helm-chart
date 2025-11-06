@@ -40,8 +40,7 @@ deployment:
   restartPolicy: Always
   args: [ ]
   image:
-    # repository -- The image repository to pull from
-    repository: your-repo.acr.io
+    repository: ghcr.io
     tag: latest
     pullPolicy: Always
   ports: { }
