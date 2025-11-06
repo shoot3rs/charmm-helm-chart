@@ -1,3 +1,14 @@
 apiVersion: v1
-entries: []
-generated: "2024-10-07T10:52:57.412507Z"
+entries:
+  charmm-helm-chart:
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2025-11-05T22:17:02.653587199Z"
+    description: A Helm chart for Kubernetes
+    digest: 2f89f6449f44501a217d13149a79ee736acb701976a636eb805cd9d7c29d4d79
+    name: charmm-helm-chart
+    type: application
+    urls:
+    - charmm-helm-chart-0.0.1.tgz
+    version: 0.0.1
+generated: "2025-11-05T22:17:02.652267434Z"
